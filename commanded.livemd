@@ -4,7 +4,7 @@
 
 ## Welcome
 
-![image](./meetup_cologne.jpeg)
+![image](/Users/mnecibi/Documents/MyProjects/Meetups/Commanded/meetup_cologne.jpeg)
 
 ## About us
 
@@ -34,7 +34,7 @@ pie title Projects Programming Languages
     "Other (Java, Go ..etc)" : 60
 ```
 
-## CQRS/ES (Mehdi)
+## CQRS/ES
 
 * CQRS: Command Query Responsibility Segregation
 * ES: Event Sourcing
@@ -111,16 +111,16 @@ columns 1
   QD --> CD
 ```
 
-## Commanded (
+## Commanded
 
-CQRS + EventSourcing + Domain driver design
+CQRS + EventSourcing
 
 * Commands
 * Events
 * Aggregate
 * Projections
 
-## Some code - (Arne)
+## Some code
 
 #### Commands
 
@@ -135,16 +135,15 @@ defmodule Command.CreateTour do
 end
 ```
 
-#### Events
+#### Router
 
 ```elixir
-defmodule Event.TourCreated do
-  use TypedStruct
+defmodule Foodbank.Router do
+  use Commanded.Commands.Router, application: Foodbank.Commanded
 
-  typedstruct do
-    field(:tour_id, binary())
-    field(:name, String.t())
-  end
+  identify(Foodbank.Tour.Aggregate, by: :tour_id, prefix: "foodbank__tour_")
+
+  dispatch([Command.CreateTour], to: Foodbank.Tour.Aggregate)
 end
 ```
 
@@ -177,17 +176,21 @@ end
 
 ```
 
-## Router
+#### Events
 
 ```elixir
-defmodule Foodbank.Router do
-  use Commanded.Commands.Router, application: Foodbank.Commanded
+defmodule Event.TourCreated do
+  use TypedStruct
 
-  identify(Foodbank.Tour.Aggregate, by: :tour_id, prefix: "foodbank__tour_")
-
-  dispatch([Command.CreateTour], to: Foodbank.Tour.Aggregate)
+  typedstruct do
+    field(:tour_id, binary())
+    field(:name, String.t())
+  end
 end
 ```
+
+
+
 
 #### Let's create a tour
 
@@ -205,7 +208,7 @@ Our events
 Foodbank.EventStore.read_all_streams_forward()
 ```
 
-### Create Tables from Events (Mehdi)
+### Create Tables from Events
 
 ```elixir
 defmodule Foodbank.DBTour do
@@ -262,27 +265,15 @@ Foodbank.Tour.Projector.start_link()
 Foodbank.DBTour |> Foodbank.Repo.all()
 ```
 
-#### Additional Ideas (Mehdi)
-
-* EventHandler
-  * notifications
-  * mails
-  * generate reports (csv/pdf documents)
-* Projections (for statistics)
-  * reseting
-  * cleanup
-
-<!-- livebook:{"break_markdown":true} -->
-
 Compare Commanded with Other Tools
 
-#### Commanded Pros
+Commanded
 
 * Event Ordering
 * Consistency
 * Sepration of conserns (Data model do not leak from one use case to another)
 
-#### Bonus Topics
+Bonus Topics
 
 * Auditing
 * Data security (GDPR)
@@ -292,9 +283,11 @@ Compare Commanded with Other Tools
 
 <!-- livebook:{"break_markdown":true} -->
 
-#### Our reference project Tafel
+* Reference Tafel - Reality
 
-* Problems
-  * 6 million events (so we cannot easily reset projection without down time)
+Problems and Pros
 
-<!-- livebook:{"offset":5143,"stamp":{"token":"XCP.6wNzQSJZ9yF9vCZQmIE18cg3pyT_rbCKzz8cBXw9yP6WXbgAlD7Wv5UH8Nnk0yOEAM3PFj7rj2-GgaMWqJUrI4LhcTpIGQRinpNdUQ","version":2}} -->
+* 6 million events (and the problems with that)
+  *
+
+<!-- livebook:{"offset":4892,"stamp":{"token":"XCP.5b1tQzHaTpE2Cl6BowYQ2jdqUt7U_QSkHu6wYNHxBi_eCkQ9ipLMerY3Vw_GurRbdcDS0xqyzn-o2TClINaNKVt4EFwUDNbtJD91C94AQymeXs-wujG-PMsuAWIPKMYsClXL5dBa1Ogt","version":2}} -->
